@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Evntly — Discover Events Near You</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f5f2eb;
+    --ink: #0f0f0f;
+    --accent: #ff3cac;
+    --accent2: #7928ca;
+    --accent3: #00d4ff;
+    --card: #ffffff;
+    --muted: #888;
+    --tag-bg: #f0eee8;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ---- NAV ---- */
+  nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.2rem 2rem;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: var(--bg);
+    border-bottom: 1.5px solid #e0dbd0;
+  }
+  .nav-logo {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 1.5rem;
+    letter-spacing: -1px;
+  }
+  .nav-logo span {
+    display: inline-block;
+    background: var(--accent);
+    color: #fff;
+    padding: 0 6px 2px;
+    border-radius: 4px;
+    margin-left: 2px;
+  }
+  .nav-links {
+    display: flex;
+    gap: 1.8rem;
+    list-style: none;
+  }
+  .nav-links a {
+    text-decoration: none;
+    color: var(--ink);
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: color .2s;
+  }
+  .nav-links a:hover { color: var(--accent); }
+  .nav-cta {
+    background: var(--ink);
+    color: #fff !important;
+    padding: 0.5rem 1.2rem;
+    border-radius: 100px;
+    font-size: 0.85rem !important;
+  }
+  .nav-cta:hover { background: var(--accent) !important; color: #fff !important; }
+
+  /* ---- HERO ---- */
+  .hero {
+    padding: 5rem 2rem 3rem;
+    max-width: 900px;
+    margin: 0 auto;
+    text-align: left;
+    position: relative;
+  }
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #fff;
+    border: 1.5px solid #e0dbd0;
+    border-radius: 100px;
+    padding: 6px 14px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    margin-bottom: 2rem;
+    animation: fadeUp .6s ease both;
+  }
+  .hero-badge .dot {
+    width: 8px; height: 8px;
+    background: #22c55e;
+    border-radius: 50%;
+    animation: pulse 1.5s infinite;
+  }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+
+  .hero h1 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: clamp(3rem, 8vw, 5.5rem);
+    line-height: 1.0;
+    letter-spacing: -3px;
+    animation: fadeUp .6s ease .1s both;
+  }
+  .hero h1 .pill {
+    display: inline-block;
+    background: var(--accent);
+    color: #fff;
+    padding: 0 20px 4px;
+    border-radius: 100px;
+    letter-spacing: -2px;
+  }
+  .hero h1 .outline {
+    -webkit-text-stroke: 2px var(--ink);
+    color: transparent;
+  }
+  .hero p {
+    margin-top: 1.5rem;
+    font-size: 1.05rem;
+    color: #555;
+    max-width: 520px;
+    line-height: 1.7;
+    font-weight: 300;
+    animation: fadeUp .6s ease .2s both;
+  }
+
+  /* ---- SEARCH BAR ---- */
+  .search-wrap {
+    margin-top: 2.5rem;
+    animation: fadeUp .6s ease .3s both;
+  }
+  .search-bar {
+    display: flex;
+    align-items: center;
+    background: #fff;
+    border: 2px solid var(--ink);
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 4px 4px 0 var(--ink);
+    transition: box-shadow .2s;
+  }
+  .search-bar:focus-within {
+    box-shadow: 6px 6px 0 var(--accent);
+    border-color: var(--accent);
+  }
+  .search-field {
+    flex: 1;
+    border: none;
+    outline: none;
+    padding: 1rem 1.2rem;
+    font-size: 1rem;
+    font-family: 'DM Sans', sans-serif;
+    background: transparent;
+    color: var(--ink);
+  }
+  .search-divider {
+    width: 1.5px;
+    height: 28px;
+    background: #e0dbd0;
+  }
+  .search-location {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 1rem;
+    font-size: 0.9rem;
+    color: #555;
+    cursor: pointer;
+    white-space: nowrap;
+    background: transparent;
+    border: none;
+    font-family: 'DM Sans', sans-serif;
+    transition: color .2s;
+  }
+  .search-location:hover { color: var(--accent); }
+  .search-btn {
+    background: var(--ink);
+    color: #fff;
+    border: none;
+    padding: 1rem 1.6rem;
+    font-size: 1rem;
+    cursor: pointer;
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    transition: background .2s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .search-btn:hover { background: var(--accent); }
+
+  .filter-row {
+    margin-top: 1rem;
+    display: flex;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+  }
+  .chip {
+    padding: 0.4rem 1rem;
+    border-radius: 100px;
+    border: 1.5px solid #d0cbc0;
+    font-size: 0.8rem;
+    font-weight: 500;
+    cursor: pointer;
+    background: transparent;
+    font-family: 'DM Sans', sans-serif;
+    transition: all .2s;
+    color: var(--ink);
+  }
+  .chip:hover, .chip.active {
+    background: var(--ink);
+    color: #fff;
+    border-color: var(--ink);
+  }
+  .chip.active.pink { background: var(--accent); border-color: var(--accent); }
+
+  /* ---- SECTIONS ---- */
+  .section {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 3rem 2rem;
+  }
+  .section-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 1.8rem;
+  }
+  .section-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 1.6rem;
+    letter-spacing: -1px;
+  }
+  .section-link {
+    font-size: 0.85rem;
+    color: var(--accent);
+    text-decoration: none;
+    font-weight: 500;
+  }
+  .section-link:hover { text-decoration: underline; }
+
+  /* ---- EVENT CARDS ---- */
+  .cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.2rem;
+  }
+  .event-card {
+    background: var(--card);
+    border: 1.5px solid #e0dbd0;
+    border-radius: 20px;
+    overflow: hidden;
+    transition: transform .2s, box-shadow .2s;
+    cursor: pointer;
+    position: relative;
+  }
+  .event-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 16px 40px rgba(0,0,0,0.1);
+  }
+  .card-img {
+    height: 160px;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3.5rem;
+  }
+  .card-img.pink { background: linear-gradient(135deg, #ff3cac, #7928ca); }
+  .card-img.blue { background: linear-gradient(135deg, #00d4ff, #0070f3); }
+  .card-img.green { background: linear-gradient(135deg, #00b894, #00cec9); }
+  .card-img.orange { background: linear-gradient(135deg, #fd79a8, #e17055); }
+  .card-img.purple { background: linear-gradient(135deg, #a29bfe, #6c5ce7); }
+  .card-img.gold { background: linear-gradient(135deg, #fdcb6e, #e67e22); }
+
+  .card-mode-badge {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    padding: 4px 12px;
+    border-radius: 100px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    font-family: 'Syne', sans-serif;
+    letter-spacing: .5px;
+    text-transform: uppercase;
+  }
+  .badge-online { background: #fff; color: #0070f3; }
+  .badge-offline { background: #fff; color: #e67e22; }
+  .badge-hybrid { background: #fff; color: var(--accent); }
+
+  .card-body { padding: 1.2rem; }
+  .card-cat {
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--muted);
+    margin-bottom: 0.4rem;
+  }
+  .card-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 1.05rem;
+    letter-spacing: -0.3px;
+    margin-bottom: 0.7rem;
+    line-height: 1.3;
+  }
+  .card-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-size: 0.82rem;
+    color: #555;
+    margin-bottom: 1rem;
+  }
+  .card-meta-row { display: flex; align-items: center; gap: 6px; }
+  .card-meta-row svg { flex-shrink: 0; color: var(--muted); }
+  .card-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 0.8rem;
+    border-top: 1px solid #f0ece4;
+  }
+  .card-price {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 1rem;
+  }
+  .card-price.free { color: #22c55e; }
+  .reg-btn {
+    background: var(--ink);
+    color: #fff;
+    border: none;
+    padding: 0.5rem 1.1rem;
+    border-radius: 100px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    font-family: 'DM Sans', sans-serif;
+    cursor: pointer;
+    transition: background .2s;
+  }
+  .reg-btn:hover { background: var(--accent); }
+
+  /* ---- MODAL ---- */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.5);
+    backdrop-filter: blur(4px);
+    z-index: 500;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--bg);
+    border: 2px solid var(--ink);
+    border-radius: 24px;
+    max-width: 560px;
+    width: 100%;
+    overflow: hidden;
+    box-shadow: 8px 8px 0 var(--ink);
+    animation: popIn .3s cubic-bezier(.34,1.56,.64,1) both;
+  }
+  @keyframes popIn {
+    from { opacity:0; transform: scale(.9) translateY(20px); }
+    to   { opacity:1; transform: scale(1) translateY(0); }
+  }
+  .modal-head {
+    height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 4rem;
+    position: relative;
+  }
+  .modal-close {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    background: rgba(255,255,255,.9);
+    border: none;
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    font-size: 1.2rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: monospace;
+  }
+  .modal-body { padding: 1.8rem; }
+  .modal-body h2 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 1.5rem;
+    letter-spacing: -0.5px;
+    margin-bottom: 1rem;
+  }
+  .modal-details {
+    display: flex;
+    flex-direction: column;
+    gap: 0.7rem;
+    margin-bottom: 1.5rem;
+  }
+  .modal-detail {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-size: 0.9rem;
+    color: #333;
+  }
+  .modal-detail .icon {
+    width: 36px;
+    height: 36px;
+    background: var(--tag-bg);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 1rem;
+  }
+  .modal-detail .info strong { display: block; font-size: 0.78rem; color: var(--muted); font-weight: 500; margin-bottom: 2px; }
+  .modal-reg-btn {
+    width: 100%;
+    background: var(--ink);
+    color: #fff;
+    border: none;
+    padding: 1rem;
+    border-radius: 14px;
+    font-size: 1rem;
+    font-weight: 700;
+    font-family: 'Syne', sans-serif;
+    cursor: pointer;
+    transition: background .2s;
+    letter-spacing: -0.3px;
+  }
+  .modal-reg-btn:hover { background: var(--accent); }
+
+  /* ---- STATS ---- */
+  .stats-row {
+    display: flex;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+    margin-top: 1.5rem;
+    animation: fadeUp .6s ease .4s both;
+  }
+  .stat {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.85rem;
+    color: #555;
+  }
+  .stat strong {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.1rem;
+    color: var(--ink);
+  }
+
+  /* ---- NO RESULTS ---- */
+  .no-results {
+    text-align: center;
+    padding: 4rem 2rem;
+    display: none;
+  }
+  .no-results .emoji { font-size: 3rem; margin-bottom: 1rem; }
+  .no-results h3 { font-family: 'Syne', sans-serif; font-size: 1.3rem; margin-bottom: 0.5rem; }
+  .no-results p { color: var(--muted); font-size: 0.9rem; }
+
+  /* ---- FOOTER ---- */
+  footer {
+    border-top: 1.5px solid #e0dbd0;
+    padding: 2rem;
+    text-align: center;
+    font-size: 0.8rem;
+    color: var(--muted);
+    margin-top: 3rem;
+  }
+  footer strong { color: var(--ink); }
+
+  @keyframes fadeUp {
+    from { opacity:0; transform: translateY(20px); }
+    to   { opacity:1; transform: translateY(0); }
+  }
+
+  @media(max-width: 600px) {
+    nav { padding: 1rem; }
+    .nav-links { display: none; }
+    .hero { padding: 3rem 1.2rem 2rem; }
+    .search-bar { flex-wrap: wrap; }
+    .search-location { border-top: 1px solid #f0ece4; }
+    .search-btn { border-radius: 0 0 14px 14px; width: 100%; justify-content: center; }
+    .cards-grid { grid-template-columns: 1fr; }
+    .section { padding: 2rem 1.2rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">evntly<span>.</span></div>
+  <ul class="nav-links">
+    <li><a href="#">Discover</a></li>
+    <li><a href="#">Categories</a></li>
+    <li><a href="#">Online Events</a></li>
+    <li><a href="#" class="nav-cta">Post Event</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-badge">
+    <span class="dot"></span>
+    Live events happening today
+  </div>
+  <h1>
+    Discover<br>
+    <span class="pill">events</span>&nbsp;<span class="outline">near</span><br>
+    you
+  </h1>
+  <p>Find concerts, seminars, workshops, webinars & more — online or nearby. Register in seconds.</p>
+
+  <div class="search-wrap">
+    <div class="search-bar">
+      <input class="search-field" type="text" id="searchInput" placeholder="Search events, topics, speakers…" oninput="handleSearch()">
+      <div class="search-divider"></div>
+      <button class="search-location" onclick="useMyLocation()">
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>
+        <span id="locationLabel">Near Me</span>
+      </button>
+      <button class="search-btn" onclick="handleSearch()">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        Search
+      </button>
+    </div>
+
+    <div class="filter-row">
+      <button class="chip active pink" onclick="filterCat(this,'All')">All</button>
+      <button class="chip" onclick="filterCat(this,'Tech')">💻 Tech</button>
+      <button class="chip" onclick="filterCat(this,'Business')">💼 Business</button>
+      <button class="chip" onclick="filterCat(this,'Health')">🧘 Health</button>
+      <button class="chip" onclick="filterCat(this,'Art')">🎨 Art</button>
+      <button class="chip" onclick="filterCat(this,'Music')">🎵 Music</button>
+      <button class="chip" onclick="filterCat(this,'Education')">📚 Education</button>
+      <button class="chip" onclick="filterCat(this,'Online')">🌐 Online Only</button>
+    </div>
+  </div>
+
+  <div class="stats-row">
+    <div class="stat"><strong>2,400+</strong> Events Listed</div>
+    <div class="stat"><strong>180+</strong> Cities</div>
+    <div class="stat"><strong>Free</strong> to Browse</div>
+  </div>
+</div>
+
+<!-- EVENTS SECTION -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-title" id="sectionTitle">🔥 Trending This Week</div>
+    <a href="#" class="section-link">View all →</a>
+  </div>
+  <div class="cards-grid" id="cardsGrid"></div>
+  <div class="no-results" id="noResults">
+    <div class="emoji">🔍</div>
+    <h3>No events found</h3>
+    <p>Try searching for something else or change your filters.</p>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modal" onclick="closeModal(event)">
+  <div class="modal" id="modalBox">
+    <div class="modal-head" id="modalHead">
+      <span id="modalEmoji"></span>
+      <button class="modal-close" onclick="closeModalBtn()">✕</button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:6px" id="modalCat"></p>
+      <h2 id="modalTitle"></h2>
+      <div class="modal-details" id="modalDetails"></div>
+      <button class="modal-reg-btn" id="modalRegBtn">Register Now — Free</button>
+    </div>
+  </div>
+</div>
+
+<footer>
+  Made with ❤️ by <strong>Evntly</strong> — Discover what's happening around you.
+</footer>
+
+<script>
+const EVENTS = [
+  { id:1, title:"AI & Future of Work Summit", cat:"Tech", mode:"Online", emoji:"🤖", color:"blue",
+    date:"Mar 5, 2025 · 10:00 AM IST", location:"Live on Zoom", price:"Free",
+    desc:"Top AI researchers and industry leaders discuss how automation is reshaping careers.",
+    speakers:"Dr. Priya Mehta, Sam Altman (via recording)", seats:"500 left", reg:"zoom.us" },
+  { id:2, title:"Startup Funding Bootcamp", cat:"Business", mode:"Hybrid", emoji:"🚀", color:"pink",
+    date:"Mar 8, 2025 · 9:00 AM", location:"WeWork BKC, Mumbai + Online", price:"₹499",
+    desc:"Learn how to pitch to VCs, build your deck, and close your seed round.",
+    speakers:"Ritesh Banglani, Anand Lunia", seats:"38 left", reg:"eventbrite.com" },
+  { id:3, title:"Mindful Leadership Workshop", cat:"Health", mode:"Offline", emoji:"🧘", color:"green",
+    date:"Mar 10, 2025 · 7:00 AM", location:"Cubbon Park, Bengaluru", price:"Free",
+    desc:"Open-air workshop on mindfulness, stress resilience, and conscious leadership.",
+    speakers:"Kavya Nair (certified mindfulness coach)", seats:"Unlimited", reg:"meetup.com" },
+  { id:4, title:"Photography Masterclass — Street & Documentary", cat:"Art", mode:"Online", emoji:"📷", color:"orange",
+    date:"Mar 12, 2025 · 4:00 PM IST", location:"Google Meet (link on registration)", price:"₹299",
+    desc:"Hone your storytelling eye with award-winning photographer Rohan Das.",
+    speakers:"Rohan Das", seats:"120 left", reg:"workshop.com" },
+  { id:5, title:"Women in Tech — Panel & Networking Night", cat:"Tech", mode:"Offline", emoji:"💻", color:"purple",
+    date:"Mar 14, 2025 · 6:00 PM", location:"91springboard, Koramangala, Bengaluru", price:"Free",
+    desc:"Panel discussion followed by speed networking. Great for mid-career women in engineering & product.",
+    speakers:"Multiple speakers from Google, Swiggy, Zepto", seats:"60 left", reg:"in.linkedin.com" },
+  { id:6, title:"Electronic Music Production 101", cat:"Music", mode:"Online", emoji:"🎧", color:"pink",
+    date:"Mar 16, 2025 · 8:00 PM IST", location:"YouTube Live (Free link shared)", price:"Free",
+    desc:"Beginner-friendly intro to Ableton Live, sound design, and releasing your first track.",
+    speakers:"BLOT! & Kohra", seats:"Unlimited", reg:"youtube.com" },
+  { id:7, title:"IELTS & Study Abroad Fair", cat:"Education", mode:"Offline", emoji:"🌍", color:"gold",
+    date:"Mar 18, 2025 · 10:00 AM – 5:00 PM", location:"NSCI Dome, Mumbai", price:"Free Entry",
+    desc:"Meet reps from 80+ universities across UK, Canada, Australia, Germany. Spot admissions available.",
+    speakers:"Various university reps", seats:"Open entry", reg:"studyabroad.com" },
+  { id:8, title:"Blockchain & Web3 Developer Conference", cat:"Tech", mode:"Hybrid", emoji:"⛓️", color:"blue",
+    date:"Mar 20, 2025 · 9:00 AM", location:"IIT Delhi + Online Stream", price:"₹999",
+    desc:"Deep technical sessions on Solidity, Layer 2s, DeFi protocols, and zero-knowledge proofs.",
+    speakers:"Sandeep Nailwal, Nischal Shetty", seats:"200 left", reg:"web3conf.in" },
+  { id:9, title:"Yoga for Beginners — Morning Flow", cat:"Health", mode:"Online", emoji:"🌅", color:"green",
+    date:"Daily · 6:30 AM IST", location:"Zoom (recurring link)", price:"Free",
+    desc:"30-min gentle morning yoga suitable for all levels. No equipment needed.",
+    speakers:"Riya Kapoor (500-hr YTT)", seats:"Unlimited", reg:"yogawithus.in" },
+];
+
+let activeCategory = "All";
+let searchQuery = "";
+let userCity = "";
+
+function renderCards(events) {
+  const grid = document.getElementById("cardsGrid");
+  const noRes = document.getElementById("noResults");
+  grid.innerHTML = "";
+  if (!events.length) {
+    noRes.style.display = "block";
+    return;
+  }
+  noRes.style.display = "none";
+  events.forEach((ev, i) => {
+    const card = document.createElement("div");
+    card.className = "event-card";
+    card.style.animationDelay = (i * 0.07) +
