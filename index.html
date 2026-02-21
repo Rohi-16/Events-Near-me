@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Evntly — Discover Events Near You</title>
+<title>Events Near Me — Discover Events Around You</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -478,12 +478,88 @@
   /* ---- NO RESULTS ---- */
   .no-results {
     text-align: center;
-    padding: 4rem 2rem;
+    padding: 3rem 2rem;
     display: none;
+    animation: fadeUp .5s ease both;
   }
-  .no-results .emoji { font-size: 3rem; margin-bottom: 1rem; }
-  .no-results h3 { font-family: 'Syne', sans-serif; font-size: 1.3rem; margin-bottom: 0.5rem; }
-  .no-results p { color: var(--muted); font-size: 0.9rem; }
+  .no-results .emoji { font-size: 3.5rem; margin-bottom: 1rem; }
+  .no-results h3 { font-family: 'Syne', sans-serif; font-size: 1.4rem; margin-bottom: 0.5rem; letter-spacing: -0.5px; }
+  .no-results > p { color: var(--muted); font-size: 0.9rem; margin-bottom: 1.8rem; }
+
+  .notify-box {
+    background: #fff;
+    border: 2px solid var(--ink);
+    border-radius: 20px;
+    padding: 1.8rem;
+    max-width: 420px;
+    margin: 0 auto 2.5rem;
+    box-shadow: 4px 4px 0 var(--ink);
+    text-align: left;
+  }
+  .notify-box h4 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 1.1rem;
+    margin-bottom: 0.4rem;
+    letter-spacing: -0.3px;
+  }
+  .notify-box .notify-desc {
+    font-size: 0.82rem;
+    color: var(--muted);
+    margin-bottom: 1rem;
+  }
+  .notify-input-row { display: flex; gap: 8px; }
+  .notify-input {
+    flex: 1;
+    border: 1.5px solid #d0cbc0;
+    border-radius: 10px;
+    padding: 0.65rem 1rem;
+    font-size: 0.85rem;
+    font-family: 'DM Sans', sans-serif;
+    outline: none;
+    transition: border-color .2s;
+    background: var(--bg);
+  }
+  .notify-input:focus { border-color: var(--accent); }
+  .notify-btn {
+    background: var(--ink);
+    color: #fff;
+    border: none;
+    padding: 0.65rem 1.2rem;
+    border-radius: 10px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    font-family: 'Syne', sans-serif;
+    cursor: pointer;
+    transition: background .2s;
+    white-space: nowrap;
+  }
+  .notify-btn:hover { background: var(--accent); }
+  .notify-success {
+    display: none;
+    align-items: center;
+    gap: 10px;
+    background: #f0fdf4;
+    border: 1.5px solid #86efac;
+    border-radius: 10px;
+    padding: 0.7rem 1rem;
+    font-size: 0.85rem;
+    color: #166534;
+    font-weight: 500;
+    margin-top: 0.8rem;
+  }
+  .upcoming-label {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 1.1rem;
+    letter-spacing: -0.3px;
+    margin-bottom: 1rem;
+    text-align: left;
+    max-width: 720px;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 0 0.5rem;
+  }
 
   /* ---- FOOTER ---- */
   footer {
@@ -517,7 +593,7 @@
 
 <!-- NAV -->
 <nav>
-  <div class="nav-logo">evntly<span>.</span></div>
+  <div class="nav-logo">Events<span>Near Me</span></div>
   <ul class="nav-links">
     <li><a href="#">Discover</a></li>
     <li><a href="#">Categories</a></li>
@@ -579,10 +655,29 @@
     <a href="#" class="section-link">View all →</a>
   </div>
   <div class="cards-grid" id="cardsGrid"></div>
+
+  <!-- NO RESULTS STATE -->
   <div class="no-results" id="noResults">
-    <div class="emoji">🔍</div>
-    <h3>No events found</h3>
-    <p>Try searching for something else or change your filters.</p>
+    <div class="emoji">😕</div>
+    <h3>No events found for "<span id="noResultsQuery"></span>"</h3>
+    <p>We couldn't find any events matching your search right now.</p>
+
+    <!-- Notify me box -->
+    <div class="notify-box">
+      <h4>🔔 Get notified when events arrive</h4>
+      <p class="notify-desc">Drop your email and we'll alert you the moment new events matching your search go live.</p>
+      <div class="notify-input-row">
+        <input class="notify-input" type="email" id="notifyEmail" placeholder="your@email.com" />
+        <button class="notify-btn" onclick="subscribeNotify()">Notify Me</button>
+      </div>
+      <div class="notify-success" id="notifySuccess">
+        ✅ You're on the list! We'll email you when matching events are added.
+      </div>
+    </div>
+
+    <!-- Upcoming events suggestion -->
+    <p class="upcoming-label">✨ Meanwhile, check out upcoming events you might like:</p>
+    <div class="cards-grid" id="upcomingGrid" style="max-width:720px;margin:0 auto;"></div>
   </div>
 </div>
 
@@ -603,63 +698,26 @@
 </div>
 
 <footer>
-  Made with ❤️ by <strong>Evntly</strong> — Discover what's happening around you.
+  Made with ❤️ by <strong>Events Near Me</strong> — Discover what's happening around you.
 </footer>
 
 <script>
-const EVENTS = [
-  { id:1, title:"AI & Future of Work Summit", cat:"Tech", mode:"Online", emoji:"🤖", color:"blue",
-    date:"Mar 5, 2025 · 10:00 AM IST", location:"Live on Zoom", price:"Free",
-    desc:"Top AI researchers and industry leaders discuss how automation is reshaping careers.",
-    speakers:"Dr. Priya Mehta, Sam Altman (via recording)", seats:"500 left", reg:"zoom.us" },
-  { id:2, title:"Startup Funding Bootcamp", cat:"Business", mode:"Hybrid", emoji:"🚀", color:"pink",
-    date:"Mar 8, 2025 · 9:00 AM", location:"WeWork BKC, Mumbai + Online", price:"₹499",
-    desc:"Learn how to pitch to VCs, build your deck, and close your seed round.",
-    speakers:"Ritesh Banglani, Anand Lunia", seats:"38 left", reg:"eventbrite.com" },
-  { id:3, title:"Mindful Leadership Workshop", cat:"Health", mode:"Offline", emoji:"🧘", color:"green",
-    date:"Mar 10, 2025 · 7:00 AM", location:"Cubbon Park, Bengaluru", price:"Free",
-    desc:"Open-air workshop on mindfulness, stress resilience, and conscious leadership.",
-    speakers:"Kavya Nair (certified mindfulness coach)", seats:"Unlimited", reg:"meetup.com" },
-  { id:4, title:"Photography Masterclass — Street & Documentary", cat:"Art", mode:"Online", emoji:"📷", color:"orange",
-    date:"Mar 12, 2025 · 4:00 PM IST", location:"Google Meet (link on registration)", price:"₹299",
-    desc:"Hone your storytelling eye with award-winning photographer Rohan Das.",
-    speakers:"Rohan Das", seats:"120 left", reg:"workshop.com" },
-  { id:5, title:"Women in Tech — Panel & Networking Night", cat:"Tech", mode:"Offline", emoji:"💻", color:"purple",
-    date:"Mar 14, 2025 · 6:00 PM", location:"91springboard, Koramangala, Bengaluru", price:"Free",
-    desc:"Panel discussion followed by speed networking. Great for mid-career women in engineering & product.",
-    speakers:"Multiple speakers from Google, Swiggy, Zepto", seats:"60 left", reg:"in.linkedin.com" },
-  { id:6, title:"Electronic Music Production 101", cat:"Music", mode:"Online", emoji:"🎧", color:"pink",
-    date:"Mar 16, 2025 · 8:00 PM IST", location:"YouTube Live (Free link shared)", price:"Free",
-    desc:"Beginner-friendly intro to Ableton Live, sound design, and releasing your first track.",
-    speakers:"BLOT! & Kohra", seats:"Unlimited", reg:"youtube.com" },
-  { id:7, title:"IELTS & Study Abroad Fair", cat:"Education", mode:"Offline", emoji:"🌍", color:"gold",
-    date:"Mar 18, 2025 · 10:00 AM – 5:00 PM", location:"NSCI Dome, Mumbai", price:"Free Entry",
-    desc:"Meet reps from 80+ universities across UK, Canada, Australia, Germany. Spot admissions available.",
-    speakers:"Various university reps", seats:"Open entry", reg:"studyabroad.com" },
-  { id:8, title:"Blockchain & Web3 Developer Conference", cat:"Tech", mode:"Hybrid", emoji:"⛓️", color:"blue",
-    date:"Mar 20, 2025 · 9:00 AM", location:"IIT Delhi + Online Stream", price:"₹999",
-    desc:"Deep technical sessions on Solidity, Layer 2s, DeFi protocols, and zero-knowledge proofs.",
-    speakers:"Sandeep Nailwal, Nischal Shetty", seats:"200 left", reg:"web3conf.in" },
-  { id:9, title:"Yoga for Beginners — Morning Flow", cat:"Health", mode:"Online", emoji:"🌅", color:"green",
-    date:"Daily · 6:30 AM IST", location:"Zoom (recurring link)", price:"Free",
-    desc:"30-min gentle morning yoga suitable for all levels. No equipment needed.",
-    speakers:"Riya Kapoor (500-hr YTT)", seats:"Unlimited", reg:"yogawithus.in" },
-];
+// ─── CONFIG — replace with your real Render URL after deploying ───────────────
+const API_BASE = "https://events-near-me-backend.onrender.com";
 
+// ─── State ────────────────────────────────────────────────────────────────────
 let activeCategory = "All";
 let searchQuery = "";
 let userCity = "";
+let userLocation = "";
+let allEvents = []; // cache last fetched events
 
-function renderCards(events) {
+// ─── Loading Skeleton ─────────────────────────────────────────────────────────
+function showSkeleton() {
   const grid = document.getElementById("cardsGrid");
-  const noRes = document.getElementById("noResults");
-  grid.innerHTML = "";
-  if (!events.length) {
-    noRes.style.display = "block";
-    return;
-  }
-  noRes.style.display = "none";
-  events.forEach((ev, i) => {
-    const card = document.createElement("div");
-    card.className = "event-card";
-    card.style.animationDelay = (i * 0.07) +
+  grid.innerHTML = Array(6).fill(`
+    <div style="background:#fff;border-radius:20px;overflow:hidden;border:1.5px solid #e0dbd0;">
+      <div style="height:160px;background:linear-gradient(90deg,#f0ece4 25%,#e8e4dc 50%,#f0ece4 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;"></div>
+      <div style="padding:1.2rem;">
+        <div style="height:12px;background:#f0ece4;border-radius:6px;margin-bottom:10px;width:60%;animation:shimmer 1.5s infinite;"></div>
+        <div style="height:18px;background:#f0ece4;border-radius:6px;margin-bottom:14px;animation:shi
